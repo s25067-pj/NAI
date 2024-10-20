@@ -1,10 +1,19 @@
-import random
+#zasady gry opisane są pod poniższym linkiem
+#https://www.gamesforyoungminds.com/blog/2018/5/25/fifteen
+
+#Autorzy kodu
+#Paulina Debis s25067
+#Krystian Jank s24586
+
+#Gra oparta na dokumentacji https://pypi.org/project/easyAI/ oraz wbudowanej biblioteki do kombinacji cyfr jako tuple
 
 from easyAI import TwoPlayerGame, Human_Player, AI_Player, Negamax
+from itertools import combinations
 
 
 class GraDo15(TwoPlayerGame):
     def __init__(self, players):
+        """Konstruktor przyjmujący graczy jako argumenty"""
         self.players = players
         self.pile = [1, 2, 3, 4, 5, 6, 7, 8, 9]
         self.player1_moves = []
@@ -24,20 +33,35 @@ class GraDo15(TwoPlayerGame):
             self.player1_moves.append(move)
         else:
             self.player2_moves.append(move)
+
     def lose(self):
-        """Sprawdza, czy gracz przegrał: jeśli suma liczb gracza wynosi 15."""
-        if self.current_player == 1:
-            return sum(self.player1_moves) == 15
-        else:
-            return sum(self.player2_moves) == 15
+        """Sprawdza, czy gracz przegrał: jeśli suma trzech liczb gracza wynosi 15."""
+
+        def check_sum(moves):
+            """Sprawdza czy istnieje taka kombinacja która suma cyfr to 15
+               jako parametr przyjmuje wykoanne ruchy"""
+            return any(sum(combo) == 15 for combo in combinations(moves, 3))
+
+        return check_sum(self.player1_moves) if self.current_player == 1 else check_sum(self.player2_moves)
 
     def is_over(self):
-        """Gra kończy się, gdy któryś z graczy uzyska sumę 15 lub wykonano wszystkie ruchy."""
+        """Gra kończy się, gdy któryś z graczy przegra lub wykonano 3 ruchy przez obu graczy."""
         return self.lose() or (len(self.player1_moves) == 3 and len(self.player2_moves) == 3)
 
     def scoring(self):
-        """Funkcja oceny dla AI"""
-        return 0 if self.lose() else 100
+        """AI ocenia swoje szanse na wygraną.
+        Więcej punktów, jeśli jest bliżej wygranej (suma trzech liczb = 15),
+        mniej punktów, jeśli przeciwnik zbliża się do wygranej."""
+
+        def score_moves(moves):
+            """Funkcja pomocnicza która szuka największej kombinacji dającej sume 15 lub mniejsza,jesli nie ma takiej
+            kombinacji zwroc zero (bład z ValueError)"""
+            return max([sum(combo) for combo in combinations(moves, 3) if sum(combo) <= 15], default=0)
+
+        if self.current_player == 1:
+            return -score_moves(self.player2_moves)
+        else:
+            return score_moves(self.player1_moves)
 
     def show(self):
         """Wyświetlanie aktualnego stanu gry."""
@@ -46,8 +70,8 @@ class GraDo15(TwoPlayerGame):
         print(f"Player 2: {self.player2_moves}, suma: {sum(self.player2_moves)}")
 
 
-ai_algo = Negamax(6)
+ai_algo = Negamax(8)
 
-if __name__ == '__main__':
-    gra = GraDo15([Human_Player(), AI_Player(ai_algo)])
-    gra.play()
+gra = GraDo15([Human_Player(), AI_Player(ai_algo)])
+
+gra.play()
