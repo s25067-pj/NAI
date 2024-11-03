@@ -1,14 +1,13 @@
-Zasady gry opisane są pod poniższym linkiem
-https://www.gamesforyoungminds.com/blog/2018/5/25/fifteen
+Cel projektu:
+Stworzenia systemu który będzie polegał na użyciu logiki rozmytej,
+aplikacja powinna poprawnie dostosować moc wentylatora do warunków panujących w pomieszczeniu,
+takich jak temperatura, wilgotność i liczba osób.
 
-Autorzy gry:
+Autorzy projektu:
 Paulina Debis s25067
 Krystian Jank s24586
 
-Straliśmy się korzystać z dokumentacji
-https://pypi.org/project/easyAI/
-
-Jeśli posiadamy zainstalowanego pythona wystarczy zainstalować bibliotekę easyAi użytą w projekcie za pomocą:
+Jeśli posiadamy zainstalowanego pythona wystarczy zainstalować biblioteki użyte w projekcie za pomocą:
 pip install scipy
 pip install networkx
 pip install scikit-fuzzy
