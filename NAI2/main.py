@@ -51,18 +51,26 @@ Definicja reguł logiki rozmytej:
 Definiujemy jaką moc powinien posiadać wiatrak w zależności od zmiennych wejsciowych.
 Znak | (or) służy do łączenia warunków  
 """
-rule1 = ctrl.Rule(temperature['low'] | humidity['poor'] | number_of_people['low'], fan_power['low'])
-rule2 = ctrl.Rule(temperature['medium'] | humidity['average'] | number_of_people['high'], fan_power['medium'])
-rule3 = ctrl.Rule(temperature['high'] | humidity['good'] | number_of_people['high'], fan_power['high'])
-rule4 = ctrl.Rule(temperature['high'] | humidity['good'] | number_of_people['high'], fan_power['high'])
+rule1 = ctrl.Rule(temperature['low'] & humidity['poor'] & number_of_people['low'], fan_power['low'])
+rule2 = ctrl.Rule(temperature['low'] & humidity['poor'] & number_of_people['high'], fan_power['medium'])
+rule3 = ctrl.Rule(temperature['low'] & humidity['good'] & number_of_people['low'], fan_power['medium'])
+rule4 = ctrl.Rule(temperature['medium'] & humidity['poor'] & number_of_people['low'], fan_power['medium'])
+rule5 = ctrl.Rule(temperature['medium'] & humidity['good'] & number_of_people['low'], fan_power['medium'])
+rule6 = ctrl.Rule(temperature['medium'] & humidity['poor'] & number_of_people['high'], fan_power['high'])
+rule7 = ctrl.Rule(temperature['high'] & number_of_people['high'], fan_power['high'])
+rule8 = ctrl.Rule(temperature['high'] & humidity['poor'] & number_of_people['low'], fan_power['medium'])
+rule9 = ctrl.Rule(temperature['high'] & humidity['good'] & number_of_people['low'], fan_power['high'])
+rule10 = ctrl.Rule(temperature['low'] & humidity['good'] & number_of_people['high'], fan_power['medium'])
+rule11 = ctrl.Rule(temperature['medium'] & humidity['average'] & number_of_people['medium'], fan_power['medium'])
 
 """
 Tworzenie systemu kontrolnego poprzez zdefiniowanie wcześniej reguł (power_of_fan_ctrl)
 Inicjalizacja symulacji zdefinowanego systemu (power_of_fan)  
 
 """
-power_of_fan_ctrl = ctrl.ControlSystem([rule1, rule2, rule3, rule4])
+power_of_fan_ctrl = ctrl.ControlSystem([rule1, rule2, rule3, rule4, rule5, rule6, rule7, rule8, rule9, rule10, rule11])
 power_of_fan = ctrl.ControlSystemSimulation(power_of_fan_ctrl)
+
 
 """
 Podane wartości wejsciowe => temperatura,wilgotnosc i liczba osob w pokoju
@@ -72,9 +80,9 @@ Wilgotność  => 0-100
 Liczba osób w pokoju => 0-12
 
 """
-power_of_fan.input['temperature'] = 15
-power_of_fan.input['humidity'] = 0
-power_of_fan.input['number_of_people'] = 0
+power_of_fan.input['temperature'] = 30
+power_of_fan.input['humidity'] = 99
+power_of_fan.input['number_of_people'] = 11
 
 """
 Wykonywanie obiczen dla podanych wartosci
