@@ -14,7 +14,7 @@ Aby uruchomić projekt należy wpisać w terminalu:
 python main.py --user1 "{IMIE NAZWISKO Z JSON}" --score-type "{Pearson || Euclidean}" --recommend
 
 np
-python main.py --user1 "Pawel Czapiewski"  --score-type "Pearson" --recommend
+python main.py --user1 "Pawel Czapiewski" --score-type "Pearson" --recommend
 
 
 Jeśli posiadamy zainstalowanego pythona wystarczy zainstalować biblioteki użyte w projekcie za pomocą:
