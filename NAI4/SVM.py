@@ -28,7 +28,7 @@ plt.figure()
 plt.contourf(xx, yy, Z, cmap=plt.cm.Paired, alpha=0.8)
 
 plt.scatter(X[:, 0], X[:, 1], c=y, cmap=plt.cm.Paired, edgecolors='k', s=75)
-plt.xlabel('Feature 1')  # Zastąp odpowiednią nazwą cechy
-plt.ylabel('Feature 2')  # Zastąp odpowiednią nazwą cechy
+plt.xlabel('Feature 1')
+plt.ylabel('Feature 2')
 plt.title('SVM with RBF kernel on Wine data')
 plt.show()
