@@ -19,11 +19,11 @@ input_file = 'data_decision_trees.txt'
 data = np.loadtxt(input_file, delimiter=';', skiprows=1)
 X, y = data[:, :-1], data[:, -1]
 
-""" Rozdzielenie wina na dobre i złe, wszystkie te które mają etykiete ponizej 6 trawiają do klasy zle """
+""" Rozdzielenie wina na dobre i złe, wszystkie te które mają etykiete ponizej 6 trawiają do klasy zle,(FIX TYLKO DWIE CECHY X=X[:,:2]) """
 y = np.where(y >= 6, 1, 0)
 class_0 = np.array(X[y == 0])
 class_1 = np.array(X[y == 1])
-
+X = X[:, :2]
 """Rysowanie wykresu danych:
 - class_0 - czyli złe wino oznaczone zostanie na wykresie jako czarne krzyzyki
 - class_1 - czyli dobre wino oznaczone zostanie na wykresie jako biale kolka
