@@ -1,7 +1,5 @@
-import pandas as pd
 import tensorflow as tf
-from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import StandardScaler
+import pandas as pd
 
 """Model uczenia sieci neuronowych zapisany w oddzielnej funkcji, ktory daje mozliwosc przetestowania roznych 
 wartosci hiperparametrow"""
@@ -9,12 +7,25 @@ wartosci hiperparametrow"""
 
 def model_for_params(units, learning_rate):
     model = tf.keras.Sequential()
-    model.add(tf.keras.layers.Input(shape=(11,)))
 
+    """Dodanie warstw konwolucyjnych - warstw przystosowanych gdy działamy na obrazach"""
+    model.add(tf.keras.layers.Input(shape=(32, 32, 3)))
+    model.add(tf.keras.layers.Conv2D(32, (3, 3), activation='relu', padding='same'))
+    model.add(tf.keras.layers.MaxPooling2D((2, 2)))
+    model.add(tf.keras.layers.Dropout(0.25))
+
+    model.add(tf.keras.layers.Conv2D(64, (3, 3), activation='relu', padding='same'))
+    model.add(tf.keras.layers.MaxPooling2D((2, 2)))
+    model.add(tf.keras.layers.Dropout(0.25))
+
+    """Dodanie warstw gęstych"""
+    model.add(tf.keras.layers.Flatten())
     for neurons in units:
         model.add(tf.keras.layers.Dense(neurons, activation='relu'))
+        model.add(tf.keras.layers.Dropout(0.5))
 
-    model.add(tf.keras.layers.Dropout(0.2)) #ochrona przed przeuczeniem sie
+    model.add(tf.keras.layers.Dense(10, activation='softmax'))
+
     model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=learning_rate),
                   loss=tf.keras.losses.CategoricalCrossentropy(from_logits=False),
                   metrics=['accuracy'])
@@ -23,26 +34,18 @@ def model_for_params(units, learning_rate):
 
 
 def main():
-    """Wczytanie danych"""
-    input_file = 'wine.txt'
+    """Wczytanie danych, podział na zbiór testowy i treningowy"""
+    (x_train, y_train), (x_test, y_test) = tf.keras.datasets.cifar10.load_data()
 
-    data = pd.read_csv(input_file, delimiter=';', quotechar='"')
-    data = data.sample(frac=1, random_state=42).reset_index(drop=True)
-
-    """Normalizacja i gorąca jedynka - pomaga osiaganiu lepszego wyuczenia"""
-    scaler = StandardScaler()
-    x, y = data.iloc[:, :-1].values, data.iloc[:, -1].values
-    y = pd.get_dummies(y).values
-    x = scaler.fit_transform(x)
-
-    """Podział na zbiór testowy i treningowy"""
-    x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.3, random_state=42)
-
+    """Normalizacja i gorąca jedynka"""
+    x_train, x_test = x_train / 255.0, x_test / 255.0
+    y_train = tf.keras.utils.to_categorical(y_train, 10)
+    y_test = tf.keras.utils.to_categorical(y_test, 10)
 
     """Hyperparametry"""
-    units = [[8, 16], [16, 32], [16, 32, 64], [32, 64]]
-    learning_rates = [0.01, 0.001, 0.0001]
-    batch_sizes = [8, 16, 32]
+    units = [[128], [128, 256], [256, 512]]
+    learning_rates = [0.001, 0.0005]
+    batch_sizes = [32, 64]
 
     best_accuracy = 0
     best_params = None
@@ -51,9 +54,9 @@ def main():
 
     """Zatrzymanie procesu trenowania modelu, gdy jego wydajność na zbiorze walidacyjnym przestaje się poprawiać"""
     early_stopping = tf.keras.callbacks.EarlyStopping(
-        monitor='val_loss',  # Monitor validation loss
-        patience=10,         # Stop if no improvement for 10 epochs
-        restore_best_weights=True  # Restore model weights from the epoch with the best validation loss
+        monitor='val_loss',
+        patience=5,
+        restore_best_weights=True
     )
 
     """Pętla do szukania najlepszych hyperparametrów"""
@@ -61,11 +64,12 @@ def main():
         for unit in units:
             for batch in batch_sizes:
                 actual_model = model_for_params(unit, rates)
-                actual_model.fit(x_train, y_train, epochs=10, batch_size=batch,
-                                 validation_data=(x_test, y_test), callbacks=[early_stopping])
-                actual_loss, actual_accuracy = actual_model.evaluate(x_test, y_test)
+                actual_model.fit(x_train, y_train, epochs=20, batch_size=batch,
+                                 validation_data=(x_test, y_test), callbacks=[early_stopping], verbose=1)
+
+                actual_loss, actual_accuracy = actual_model.evaluate(x_test, y_test, verbose=0)
                 print(
-                    f"Actual model (learning rates: {rates}, units: {unit}, batch size: {batch}) - loss: {actual_loss}, accuracy: {actual_accuracy}")
+                    f"Model (learning rate: {rates}, units: {unit}, batch size: {batch}) - loss: {actual_loss}, accuracy: {actual_accuracy}")
 
                 results.append({
                     'learning_rate': rates,
