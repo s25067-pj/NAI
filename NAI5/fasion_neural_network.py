@@ -1,5 +1,8 @@
 import tensorflow as tf
 import pandas as pd
+from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
+import matplotlib.pyplot as plt
+import numpy as np
 
 """Model uczenia sieci neuronowych zapisany w oddzielnej funkcji, ktory daje mozliwosc przetestowania roznych 
 wartosci hiperparametrow"""
@@ -9,7 +12,7 @@ def model_for_params(units, learning_rate):
     model = tf.keras.Sequential()
 
     """Dodanie warstw konwolucyjnych - warstw przystosowanych gdy działamy na obrazach"""
-    model.add(tf.keras.layers.Input(shape=(32, 32, 3))) #obrazy w wymiarze 32x32 w trzech kolorach
+    model.add(tf.keras.layers.Input(shape=(28, 28, 1))) #obrazy w wymiarze 28x28 w jednym kolorze
     model.add(tf.keras.layers.Conv2D(32, (3, 3), activation='relu', padding='same'))
     model.add(tf.keras.layers.MaxPooling2D((2, 2)))
     model.add(tf.keras.layers.Dropout(0.25))
@@ -35,7 +38,7 @@ def model_for_params(units, learning_rate):
 
 def main():
     """Wczytanie danych, podział na zbiór testowy i treningowy"""
-    (x_train, y_train), (x_test, y_test) = tf.keras.datasets.cifar10.load_data()
+    (x_train, y_train), (x_test, y_test) = tf.keras.datasets.fashion_mnist.load_data()
 
     """Normalizacja i gorąca jedynka"""
     x_train, x_test = x_train / 255.0, x_test / 255.0
@@ -96,8 +99,27 @@ def main():
     test_loss, test_accuracy = best_model.evaluate(x_test, y_test)
     print(f"\nTest Loss: {test_loss}, Test Accuracy: {test_accuracy}")
 
+    """Macierz konfuzji dla danych testowych"""
+    print("\nGenerating Confusion Matrix...")
+
+    y_pred = best_model.predict(x_test)
+    y_pred_classes = np.argmax(y_pred, axis=1)  # Przekształcenie wyników softmax do etykiet klas
+    y_true = np.argmax(y_test, axis=1)  # Zamiana one-hot na etykiety klas
+
+    cm = confusion_matrix(y_true, y_pred_classes)
+    print("Confusion Matrix:")
+    print(cm)
+
+    """Wyświetlenie macierzy konfuzji"""
+    labels = ['T-shirt', 'Trouser', 'Pullover', 'Dress', 'Coat', 'Sandal', 'Shirt', 'Sneaker', 'Bag', 'Ankle Boot']
+    disp = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=labels)
+    disp.plot(cmap=plt.cm.Blues, xticks_rotation=45)
+    plt.title('Confusion Matrix - Test Data')
+    plt.show()
+
     return actual_results, best_params, test_loss, test_accuracy
 
 
 if __name__ == "__main__":
     main()
+
